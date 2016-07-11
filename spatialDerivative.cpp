@@ -1,4 +1,4 @@
-Func spatial_derivative(Func T, Expr spaOrd, Expr temOrd) {
+Func spatial_derivative(Func T) {
 // This program computers spatial gaussian derivative up to nfilt-oder
 
     uint8_t nfilt = 5;
@@ -14,19 +14,24 @@ Func spatial_derivative(Func T, Expr spaOrd, Expr temOrd) {
     Image<float> SFILT(sn,nfilt+1);
     for (int rs = 0; rs < sn; rs++) {
         float si = rs - (sn-1)/2;
-        float gauss = exp(-(pow(si,2)/(4*sigma)))/sqrt(4*sigma*3.1415926);
+        float gauss = exp(-(pow(si,2.0f)/(4*sigma)))/sqrt(4*sigma*M_PI);
+        // float gauss = exp(-(pow(x,2)/(4*sigma)))/sqrt(4*sigma*PI);
         for (int ro = 0; ro <= nfilt; ro++) {
             float H = 0;
-            for (int io = 0; io < ro; io++) {
-                H = H + pow((-1),io) * (pow((2*si),(ro-2*io))/pow((4*sigma),(ro-io)))/(factorial(io)*factorial(ro-2*io));
+            for (int io = 0; io <= ro/2; io++) {
+                // MATLAB-Equivalent H = H + pow((-1),m) * (pow((2*x),(n-2*m))/pow((4*sigma),(n-m)))/(factorial(m)*factorial(n-2*m))
+                // si ~ x; sigma ; io ~ m; ro ~ n
+                H = H + pow((-1),io) * (pow((2*si),(ro-2*io))/pow((4*sigma),(ro-io)))/float(factorial(io)*factorial(ro-2*io));
             }
             H = factorial(ro)*H;
             SFILT(rs,ro) = H*gauss;
+            // printf("%f ",SFILT(rs,ro));
         }
+        // printf("\n");
     }
 
     // create a new range
-   RDom rs(0,sn-1);
+    RDom rs(0,sn);
 
     /////////////////////////////////////////////////
     // Apply spatial derivative filter on T0,T1,T2 //
@@ -34,9 +39,9 @@ Func spatial_derivative(Func T, Expr spaOrd, Expr temOrd) {
 
     // // Version 1: does not generate anything
     Func tmp_col("tmp_col");
-    std::vector<Expr> tmp_col_expr((nfilt+1)*numTB,undef<float>()); // define a vector of expression
+    std::vector<Expr> tmp_col_expr((nfilt+1)*numTB,cast<float>(0.0f)); // define a vector of expression
     Func basis("basis");
-    std::vector<Expr> basis_expr(numSTB,undef<float>());
+    std::vector<Expr> basis_expr(numSTB,cast<float>(0.0f));
     // basis(x,y,c,t) = Tuple(basis_expr);
     int iB = 0;
 
@@ -46,10 +51,11 @@ Func spatial_derivative(Func T, Expr spaOrd, Expr temOrd) {
     // FIR filter on horizontal axis
     for (int iTf = 0; iTf < numTB; iTf++ ) { // iTf: index of temporal filter, we only take the first two orders
         for (int iSf=0; iSf<=nfilt; iSf++){ // iSf: index of spatial filter
-            tmp_col_expr[iTf*(nfilt+1)+iSf] = sum(rs,T(x + rs.x - 1,y,c,t)[iTf]*SFILT(rs.x,iSf),"sum_col");
+            tmp_col_expr[iTf*(nfilt+1)+iSf] = sum(rs,T(x,y + rs.x,c,t)[iTf]*SFILT(rs.x,iSf),"sum_col");
         }
     }
     tmp_col(x,y,c,t) = Tuple(tmp_col_expr);
+    tmp_col.compute_root();
 
     // FIR filter on vertical axis
     for (int iTf = 0; iTf < numTB; iTf++)
@@ -57,10 +63,9 @@ Func spatial_derivative(Func T, Expr spaOrd, Expr temOrd) {
             for (int iSf1 = 0; iSf1<=iSf; iSf1++)
                 for (int iSf2 = 0; iSf2<=iSf; iSf2++)
                     if ((iSf1+iSf2) == iSf) {
-                        basis_expr[iB] = sum(rs,tmp_col(x,y + rs.x - 1,c,t)[iTf*(nfilt+1)+iSf1]*SFILT(rs.x,iSf2),"sum_basis");
+                        basis_expr[iB] = sum(rs,tmp_col(x + rs.x,y,c,t)[iTf*(nfilt+1)+iSf1]*SFILT(rs.x,iSf2),"sum_basis");
                         iB++;
                     }
-
     basis(x,y,c,t) = Tuple(basis_expr);
     return basis;
 
