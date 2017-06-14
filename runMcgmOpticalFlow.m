@@ -8,17 +8,34 @@ close all
 % bufferData: store frame data of predefined temporal buffer
 % frmHeight: frame height, frmWidth: frame width,
 % noColorChan: number of color channels, noFrm: number of frames
-testCase = 'newCR3'
-vidDirName = ['Stimulus/' testCase '/']; %  'Stimulus/plaid/'
-outVidName = ['results/' testCase '.avi'];
+
+% $$$ vidDirName = ['Stimulus/' testCase '/']; %  'Stimulus/plaid/'
+
+% $$$ testCase = 'newCR3'; noFrm = 200;
+% $$$ frmWidth = 320; frmHeight = 240; noColorChan = 3;
+
+testCase = 'bbaf2n_'; noFrm = 75;
+frmWidth = 360; frmHeight = 288; noColorChan = 3;
+% testCase = 'ep0201f_'; noFrm = 44;
+% frmWidth = 640; frmHeight = 480; noColorChan = 3;
+% testCase = 'h2n2a_'; noFrm = 200;
+% frmWidth = 1280/4; frmHeight = 960/3; noColorChan = 3;
+% testCase = 'ns01t01_'; noFrm = 66;
+% frmWidth = 1280; frmHeight = 720; noColorChan = 3;
+% testCase = 'grating'; noFrm = 128;
+% frmWidth = 128; frmHeight = 128; noColorChan = 3;
+
+%% Interpolated by Gaussian Blur
+% $$$ testCase = 'gratingInterp'; noFrm = 30;
+% $$$ frmWidth = 128; frmHeight = 128; noColorChan = 1;
+% $$$ testCase = 'newCR3Interp'; noFrm = 32;
+% $$$ frmWidth = 320; frmHeight = 240; noColorChan = 1;
+
+
+vidDirName = ['Stimulus/' testCase '/'];
+outVidName = ['results/' testCase '_complexInterpretation_motion.avi'];
 vidFileHdl = VideoWriter(outVidName);
 vidFileHdl.FrameRate = 10;
-
-noFrm = 200;
-
-frmWidth = 320;% $$$ frmWidth = 320;
-frmHeight = 240;% $$$ frmHeight = 240;
-noColorChan = 3;
 
 % $$$ bufferSize = 23;
 % $$$ bufferData = single(zeros(frmHeight,frmWidth,noColorChan,bufferSize));
@@ -115,20 +132,69 @@ for iO = 1:numOut-1
     outVar = [outVar,',o',num2str(iO)];
 end
 
+% Continuous input
 for iFrm = 1:noFrm
      %% Read data from each of first (offset + bufferSize - 1) frames
      % frameName = [vidDirName, num2str(iFrm,'newCR3%.3d'),
      % '.png'];
-     frameName = [vidDirName, num2str(iFrm,[testCase '%.3d']), '.png'];
+     frameName = [vidDirName, num2str(iFrm,[testCase '%.3d']), ...
+                  '.png'];
+     %% Use whole frame
      inData(:,:,:,iFrm) = im2single(imread(frameName));
+     %% Crop central face
+     % tmp = im2single(imread(frameName));
+     % inData(:,:,:,iFrm) = tmp((960/2-frmHeight/2):(960/2+frmHeight/2-1),(1280/2-frmWidth/2):(1280/2+frmWidth/2-1),:);
 end
 
-filterthreshold = single(1e-5); % 1e-4.8
+% Jump and smooth input by Gaussian
+% $$$ for iFrm = 6:4:noFrm
+% $$$      %% Read data from each of first (offset + bufferSize - 1) frames
+% $$$      % frameName = [vidDirName, num2str(iFrm,'newCR3%.3d'),
+% $$$      % '.png'];
+% $$$      frameName = [vidDirName, num2str(iFrm,[testCase '%.3d']), '.png'];
+% $$$      inData(:,:,:,iFrm) = im2single(imread(frameName));
+% $$$ end
+% $$$ 
+% $$$ % Create bluring effect
+% $$$ windowWidth = int16(23);
+% $$$ gaussFilter = gausswin(windowWidth,1);
+% $$$ gaussFilter = gaussFilter / sum(gaussFilter); % Normalize.
+% $$$                                               % inData = inData * 6;
+% $$$ 
+% $$$ for indRow = 1:frmHeight
+% $$$     for indCol = 1:frmWidth
+% $$$         for indChn = 1:noColorChan
+% $$$             inData(indRow,indCol,indChn,:) = ...
+% $$$                 conv(squeeze(inData(indRow,indCol,indChn,:)),gaussFilter,'same');
+% $$$         end
+% $$$     end
+% $$$ end
+
+% $$$ gjVidFileHdl = VideoWriter('./Stimulus/generated_jump.avi');
+% $$$ gjVidFileHdl.FrameRate = 5;
+% $$$ 
+% $$$ open(gjVidFileHdl);
+% $$$ inData = mat2gray(inData);
+% $$$ for iFrm = 1:noFrm
+% $$$     writeVideo(gjVidFileHdl,inData(:,:,:,iFrm));
+% $$$ end
+% $$$ close(gjVidFileHdl);
+
+%% Model parameter for motion model
+filterthreshold = single(10^(-5)); % 1e-4.8
 divisionthreshold = single(1e-30); % 1e-30
-divisionthreshold2 = single(1e-25); % 1e-25
+divisionthreshold2 = single(0.99); % 1e-25
 speedthreshold = single(1e-6); % 1e-6
 
-eval(['mcgmOpticalFlow(inData,filterthreshold,divisionthreshold,divisionthreshold2,speedthreshold,',outVar,');']);
+eval(['mcgmOpticalFlow_v02(inData,filterthreshold,divisionthreshold,divisionthreshold2,speedthreshold,',outVar,');']);
+
+%% Model parameter for stereo model
+% $$$ filterthreshold = single(1e-5); % 1e-4.8
+% $$$ divisionthreshold = single(1e-30); % 1e-30
+% $$$ divisionthreshold2 = single(0.99); % 1e-25
+% $$$ speedthreshold = single(1e-6); % 1e-6
+% $$$ 
+% $$$ eval(['mcgmOpticalFlow_v02_stereo(inData,filterthreshold,divisionthreshold,divisionthreshold2,speedthreshold,',outVar,');']);
 
 %% Output with colour conversion
 

@@ -8,7 +8,8 @@ Func color_derivative(Func input) {
         // specDeri (x, y, 1, t) = input(x,y,0,t) * 0.25f   + input(x,y,1,t) * 0.25f  - input(x,y,2,t) * 0.5f;
         // specDeri (x, y, 2, t) = input(x,y,0,t) * 0.5f    - input(x,y,1,t) * 0.5f;
 
-        Image<float> colorRF(3,3,"colorRF");
+        // Image<float> colorRF(3,3,"colorRF");
+        Buffer<float> colorRF(3,3);
         colorRF(0,0) = m; colorRF(1,0) = m; colorRF(2,0) = m;
         colorRF(0,1) = 0.25f; colorRF(1,1) = 0.25f; colorRF(2,1) = -0.5f;
         colorRF(0,2) = 0.5f; colorRF(1,2) = -0.5f; colorRF(2,2) = 0.0f;

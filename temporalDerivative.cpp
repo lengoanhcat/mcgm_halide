@@ -35,7 +35,7 @@ Func temporal_derivative(Func input) {
 
     //@Cat: generate a mask by a normal for-loop
 
-    Image<float> d_ltm0(23), d_ltm1(23), d_ltm2(23); // 23 is the size of temporary window
+    Buffer<float> d_ltm0(23), d_ltm1(23), d_ltm2(23); // 23 is the size of temporary window
     d_ltm0(0) = 0.0f; d_ltm1(0) = 0.0f; d_ltm2(0) = 0.0f;
     for (int rt = 1; rt<tn ; rt++) {
         d_ltm0(rt) = exp(-pow(log(rt/alpha)/tau,2.0f))/(sqrt(M_PI)*alpha*tau*exp((pow(tau,2.0f)/4.0f)));
