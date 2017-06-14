@@ -1,5 +1,10 @@
-Please use MATLAB to run 
+# Compilation
+ I am using a branch of halide which can be found here https://github.com/halide/Halide/tree/auto_scheduler
 
-- runMcgmOpticalFlow.m 
+- Open MATLAB and run: compileMcgmHalide.m
 
-to compile and see the error 
+# Run
+
+- runMcgmOpticalFlow.m
+
+to compile and see the error
