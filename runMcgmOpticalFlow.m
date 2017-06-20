@@ -2,7 +2,7 @@
 %% optical flow with Multichannel Gaussian Model
 
 % Add path for displaying color result
-addpath('/home/lpzal1/Alan_new_model');
+% addpath('/home/lpzal1/Alan_new_model');
 
 close all
 % bufferData: store frame data of predefined temporal buffer
@@ -14,16 +14,16 @@ close all
 % $$$ testCase = 'newCR3'; noFrm = 200;
 % $$$ frmWidth = 320; frmHeight = 240; noColorChan = 3;
 
-testCase = 'bbaf2n_'; noFrm = 75;
-frmWidth = 360; frmHeight = 288; noColorChan = 3;
+% testCase = 'bbaf2n_'; noFrm = 75;
+% frmWidth = 360; frmHeight = 288; noColorChan = 3;
 % testCase = 'ep0201f_'; noFrm = 44;
 % frmWidth = 640; frmHeight = 480; noColorChan = 3;
 % testCase = 'h2n2a_'; noFrm = 200;
 % frmWidth = 1280/4; frmHeight = 960/3; noColorChan = 3;
 % testCase = 'ns01t01_'; noFrm = 66;
 % frmWidth = 1280; frmHeight = 720; noColorChan = 3;
-% testCase = 'grating'; noFrm = 128;
-% frmWidth = 128; frmHeight = 128; noColorChan = 3;
+testCase = 'grating'; noFrm = 128;
+frmWidth = 128; frmHeight = 128; noColorChan = 3;
 
 %% Interpolated by Gaussian Blur
 % $$$ testCase = 'gratingInterp'; noFrm = 30;
