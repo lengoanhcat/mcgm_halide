@@ -10,7 +10,7 @@ addpath(fullfile(getenv('HALIDE_PATH'), 'tools'));
 % $$$ setenv('LIBRARY_PATH','/usr/local/matlab/R2016a/bin/glnxa64/');
 
 % Build the mex library from the blur generator.
-setenv('HL_DEBUG_CODEGEN','2');
+setenv('HL_DEBUG_CODEGEN','1');
 setenv('HL_NUM_THREADS','12');
 % $$$ setenv('HL_TRACE','1');
 % $$$ setenv('HL_TRACE_FILE','./mcgmOpticalFlow.trace');

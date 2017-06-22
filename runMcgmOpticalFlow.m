@@ -5,6 +5,7 @@
 % addpath('/home/lpzal1/Alan_new_model');
 
 close all
+setenv('HL_NUM_THREADS','12');
 % bufferData: store frame data of predefined temporal buffer
 % frmHeight: frame height, frmWidth: frame width,
 % noColorChan: number of color channels, noFrm: number of frames
@@ -22,8 +23,13 @@ close all
 % frmWidth = 1280/4; frmHeight = 960/3; noColorChan = 3;
 % testCase = 'ns01t01_'; noFrm = 66;
 % frmWidth = 1280; frmHeight = 720; noColorChan = 3;
-testCase = 'grating'; noFrm = 128;
-frmWidth = 128; frmHeight = 128; noColorChan = 3;
+% $$$ testCase = 'grating'; noFrm = 128;
+% $$$ frmWidth = 128; frmHeight = 128; noColorChan = 3;
+
+testCase = 'Cart_TPAT_3_PF_6_8_11fps';
+inVidName = ['/home/lpzal1/FredMRI/' testCase '.mov'];
+% frmWidth = 683; frmHeight = 858; noFrm = 100; noColorChan = 3;
+frmWidth = 320; frmHeight = 480; noFrm = 100; noColorChan = 3;
 
 %% Interpolated by Gaussian Blur
 % $$$ testCase = 'gratingInterp'; noFrm = 30;
@@ -132,19 +138,28 @@ for iO = 1:numOut-1
     outVar = [outVar,',o',num2str(iO)];
 end
 
-% Continuous input
-for iFrm = 1:noFrm
-     %% Read data from each of first (offset + bufferSize - 1) frames
-     % frameName = [vidDirName, num2str(iFrm,'newCR3%.3d'),
-     % '.png'];
-     frameName = [vidDirName, num2str(iFrm,[testCase '%.3d']), ...
-                  '.png'];
-     %% Use whole frame
-     inData(:,:,:,iFrm) = im2single(imread(frameName));
-     %% Crop central face
-     % tmp = im2single(imread(frameName));
-     % inData(:,:,:,iFrm) = tmp((960/2-frmHeight/2):(960/2+frmHeight/2-1),(1280/2-frmWidth/2):(1280/2+frmWidth/2-1),:);
+% % Continuous input
+% for iFrm = 1:noFrm
+%      %% Read data from each of first (offset + bufferSize - 1) frames
+%      % frameName = [vidDirName, num2str(iFrm,'newCR3%.3d'),
+%      % '.png'];
+%      frameName = [vidDirName, num2str(iFrm,[testCase '%.3d']), ...
+%                   '.png'];
+%      %% Use whole frame
+%      inData(:,:,:,iFrm) = im2single(imread(frameName));
+%      %% Crop central face
+%      % tmp = im2single(imread(frameName));
+%      % inData(:,:,:,iFrm) = tmp((960/2-frmHeight/2):(960/2+frmHeight/2-1),(1280/2-frmWidth/2):(1280/2+frmWidth/2-1),:);
+% end
+
+% Continuous Video Input
+v = VideoReader(inVidName);
+iFrm = 0;
+while hasFrame(v)
+    iFrm = iFrm + 1;
+    inData(:,:,:,iFrm) = im2single(imresize(readFrame(v),[frmHeight frmWidth]));
 end
+
 
 % Jump and smooth input by Gaussian
 % $$$ for iFrm = 6:4:noFrm
@@ -186,7 +201,7 @@ divisionthreshold = single(1e-30); % 1e-30
 divisionthreshold2 = single(0.99); % 1e-25
 speedthreshold = single(1e-6); % 1e-6
 
-eval(['mcgmOpticalFlow_v02(inData,filterthreshold,divisionthreshold,divisionthreshold2,speedthreshold,',outVar,');']);
+eval(['mcgmOpticalFlow_v02_autoscheduled(inData,filterthreshold,divisionthreshold,divisionthreshold2,speedthreshold,',outVar,');']);
 
 %% Model parameter for stereo model
 % $$$ filterthreshold = single(1e-5); % 1e-4.8

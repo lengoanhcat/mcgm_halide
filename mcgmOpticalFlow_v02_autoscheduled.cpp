@@ -16,7 +16,6 @@ Var x("x"),y("y"),c("c"),t("t"),x_outer("x_outer"),
 Expr width, height, noChn, noFrm;
 uint8_t sn;
 
-#include "halide_profile_utils.cpp"
 #include "math_utils_v01.cpp"
 #include "colorDerivative.cpp"
 #include "temporalDerivative.cpp"
@@ -94,12 +93,21 @@ public:
         Func outPut("outPut");
         // outPut(x,y,t) = Tuple(Tx(x,y,0,t)[0],optFlw(x,y,t)[0],optFlw(x,y,t)[1]);
         outPut(x,y,t) = optFlw(x,y,t);
+
+        // Provide estimates on the output
         outPut.estimate(x,0,width).estimate(y,0,height).estimate(t,0,noFrm);
 
+        // Provide estimates on input
         input.dim(0).set_bounds_estimate(0,320);
         input.dim(1).set_bounds_estimate(0,480);
         input.dim(2).set_bounds_estimate(0,3);
         input.dim(3).set_bounds_estimate(0,200);
+
+        // Provide estimates on the parameters
+        filterthreshold.set_estimate((float) pow(10.0,-4.8));
+        divisionthreshold.set_estimate((float) pow(10.0,-30.0));
+        divisionthreshold2.set_estimate((float) pow(10.0,-25.0));
+        speedthreshold.set_estimate(0.000001f);
 
         std::vector<Target::Feature> plpamnesia_features;
         plpamnesia_features.push_back(Target::SSE41);
@@ -112,12 +120,12 @@ public:
         target.arch = Target::X86;
         target.bits = 64;
         target.set_features(plpamnesia_features);
-        Pipeline p(outPut);
+        Pipeline pipeline(outPut);
 
-        p.auto_schedule(target);
+        pipeline.auto_schedule(target);
 
         // Computer angle and speed with speed model
-        return p.get_func(0);
+        return pipeline.get_func(0);
     };
 };
 
