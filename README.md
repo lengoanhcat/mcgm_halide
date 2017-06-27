@@ -5,5 +5,5 @@
     runMcgmOpticalFlow.m to compile and see the error
 
 # Results
-    [![Watch the video](autoscheduled.jpg)](https://drive.google.com/open?id=0B6M9WORr4RE_TTlZVkJoaDhYR1U)
-    [![Watch the video](manualscheduled.jpg)](https://drive.google.com/open?id=0B6M9WORr4RE_UUJtMFllZVRRcE0)
+    [![Autoscheduled Process](gif/autoscheduled.gif)](https://youtu.be/RZeD9RGo3Gc)
+    [![Manualscheduled](gif/manualscheduled.gif)](https://youtu.be/b-fFe0ln_6w)
