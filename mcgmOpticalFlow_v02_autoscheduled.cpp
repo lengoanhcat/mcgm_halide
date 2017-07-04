@@ -43,13 +43,13 @@ public:
 
     Func build() {
 
-        width = Expr((int) 320); // width = input.width();
-        height = Expr((int) 480); // height = input.height();
+        width = Expr((int) 960); // width = input.width();
+        height = Expr((int) 1440); // height = input.height();
         noChn = Expr((int) 3); // noChn = input.channels();
-        noFrm = Expr((int) 200);    // noFrm = input.extent(3);
+        noFrm = Expr((int) 222);    // noFrm = input.extent(3);
 
         uint8_t orders[4] = {5,2,2,2};
-        uint8_t angle = 4; // 24;
+        uint8_t angle = 24; // 24;
         // Expr filterthreshold((float) pow(10.0,-4.8));
         // Expr divisionthreshold((float) pow(10.0,-30.0));
         // Expr divisionthreshold2((float) pow(10.0,-25.0));
@@ -90,18 +90,25 @@ public:
         //////////////////////////////////////
         // Auto-schedule the whole pipeline //
         //////////////////////////////////////
-        Func outPut("outPut");
-        // outPut(x,y,t) = Tuple(Tx(x,y,0,t)[0],optFlw(x,y,t)[0],optFlw(x,y,t)[1]);
-        outPut(x,y,t) = optFlw(x,y,t);
 
-        // Provide estimates on the output
-        outPut.estimate(x,0,width).estimate(y,0,height).estimate(t,0,noFrm);
+        int num_stencils = 2;
+        std::vector<Func> stencils;
+        for(int i = 0; i < num_stencils; i ++) {
+            Func s("stencil_" + std::to_string(i));
+            stencils.push_back(s);
+        }
+
+        for (int i = 0; i < num_stencils; i++) {
+            stencils[i](x,y,t) = optFlw(x,y,t)[i];
+            // Provide estimates on the output
+            stencils[i].estimate(x,0,width).estimate(y,0,height).estimate(t,0,noFrm);
+        }
 
         // Provide estimates on input
-        input.dim(0).set_bounds_estimate(0,320);
-        input.dim(1).set_bounds_estimate(0,480);
+        input.dim(0).set_bounds_estimate(0,960);
+        input.dim(1).set_bounds_estimate(0,1440);
         input.dim(2).set_bounds_estimate(0,3);
-        input.dim(3).set_bounds_estimate(0,200);
+        input.dim(3).set_bounds_estimate(0,222);
 
         // Provide estimates on the parameters
         filterthreshold.set_estimate((float) pow(10.0,-4.8));
@@ -109,23 +116,30 @@ public:
         divisionthreshold2.set_estimate((float) pow(10.0,-25.0));
         speedthreshold.set_estimate(0.000001f);
 
-        std::vector<Target::Feature> plpamnesia_features;
-        plpamnesia_features.push_back(Target::SSE41);
-        plpamnesia_features.push_back(Target::Matlab);
-        plpamnesia_features.push_back(Target::LargeBuffers);
-        plpamnesia_features.push_back(Target::CUDACapability50);
+        std::vector<Target::Feature> lomond_features;
+        lomond_features.push_back(Target::SSE41);
+        lomond_features.push_back(Target::Matlab);
+        lomond_features.push_back(Target::LargeBuffers);
 
         Target target;
         target.os = Target::Linux;
         target.arch = Target::X86;
         target.bits = 64;
-        target.set_features(plpamnesia_features);
-        Pipeline pipeline(outPut);
+        target.set_features(lomond_features);
+        // Target target = get_target_from_environment();
+        Pipeline pipeline(stencils);
 
-        pipeline.auto_schedule(target);
+        std::cout << "\n\n******************************************\nSCHEDULE:\n"
+                  << "******************************************\n"
+                  << pipeline.auto_schedule(target)
+                  << "\n******************************************\n\n";
+
+        Func outPut("outPut");
+        outPut(x,y,t) = Tuple(stencils[0](x,y,t),stencils[1](x,y,t));
 
         // Computer angle and speed with speed model
-        return pipeline.get_func(0);
+        // return pipeline.get_func(84);
+        return outPut;
     };
 };
 
