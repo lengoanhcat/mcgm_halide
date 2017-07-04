@@ -57,9 +57,9 @@ Func ColorMgather(Func stBasis, float angle, uint8_t * orders, Expr filterthresh
     // std::vector<Expr>Yk_expr (max_order,cast<float>(0.0f));
     // std::vector<Expr>Tk_expr (max_order,cast<float>(0.0f));
 
-    uint8_t Xk_uI[max_order];
-    uint8_t Yk_uI[max_order];
-    uint8_t Tk_uI[max_order];
+    // uint8_t Xk_uI[max_order];
+    // uint8_t Yk_uI[max_order];
+    // uint8_t Tk_uI[max_order];
     Func Xk[max_order]; Func Yk[max_order]; Func Tk[max_order];
 
     // Expr Xk[max_order],Yk[max_order],Tk[max_order];
@@ -68,9 +68,9 @@ Func ColorMgather(Func stBasis, float angle, uint8_t * orders, Expr filterthresh
         Xk[iO](x,y,t) = Expr(0.0f);
         Yk[iO](x,y,t) = Expr(0.0f);
         Tk[iO](x,y,t) = Expr(0.0f);
-        Xk_uI[iO] = 0;
-        Yk_uI[iO] = 0;
-        Tk_uI[iO] = 0;
+        // Xk_uI[iO] = 0;
+        // Yk_uI[iO] = 0;
+        // Tk_uI[iO] = 0;
     }
 
     int k = 0;
@@ -103,12 +103,12 @@ Func ColorMgather(Func stBasis, float angle, uint8_t * orders, Expr filterthresh
                         Yk[k+k1](x,y,t) += Yrg(x,y,t);
                         Tk[k+k1](x,y,t) += Trg(x,y,t);
 
-                        Xk[k].update(Xk_uI[k]); Xk_uI[k]++;
-                        Yk[k].update(Yk_uI[k]); Yk_uI[k]++;
-                        Tk[k].update(Tk_uI[k]); Tk_uI[k]++;
-                        Xk[k+k1].update(Xk_uI[k+k1]); Xk_uI[k+k1]++;
-                        Yk[k+k1].update(Yk_uI[k+k1]); Yk_uI[k+k1]++;
-                        Tk[k+k1].update(Tk_uI[k+k1]); Tk_uI[k+k1]++;
+                        // Xk[k].update(Xk_uI[k]); Xk_uI[k]++;
+                        // Yk[k].update(Yk_uI[k]); Yk_uI[k]++;
+                        // Tk[k].update(Tk_uI[k]); Tk_uI[k]++;
+                        // Xk[k+k1].update(Xk_uI[k+k1]); Xk_uI[k+k1]++;
+                        // Yk[k+k1].update(Yk_uI[k+k1]); Yk_uI[k+k1]++;
+                        // Tk[k+k1].update(Tk_uI[k+k1]); Tk_uI[k+k1]++;
                     }
                 }
 
@@ -133,9 +133,9 @@ Func ColorMgather(Func stBasis, float angle, uint8_t * orders, Expr filterthresh
     Func st("st"); st(x,y,t) = Tuple(st_expr);
     // st.compute_root();
 
-    Expr x_clamped = clamp(x,0,width-1);
-    Expr y_clamped = clamp(y,0,height-1);
-    Func st_clamped("st_clamped"); st_clamped(x,y,t) = st(x_clamped,y_clamped,t);
+    // Expr x_clamped = clamp(x,0,width-1);
+    // Expr y_clamped = clamp(y,0,height-1);
+    // Func st_clamped("st_clamped"); st_clamped(x,y,t) = st(x_clamped,y_clamped,t);
 
     // float win = 7.0;
     // Image<float> meanfilter(7,7,"meanfilter_data");
@@ -149,7 +149,7 @@ Func ColorMgather(Func stBasis, float angle, uint8_t * orders, Expr filterthresh
     for (uint8_t iPc=0; iPc<6; iPc++) {
     // iPc: index of product component
         // Apply average filter
-        st_filtered[iPc](x,y,t) = sum(rMF,st_clamped(x + rMF.x,y + rMF.y,t)[iPc]/Expr(float(win*win)),"mean_filter");
+        st_filtered[iPc](x,y,t) = sum(rMF,st(x + rMF.x,y + rMF.y,t)[iPc]/Expr(float(win*win)),"mean_filter");
         // st_filtered[iPc].compute_root();
     }
     // Tuple st_tuple = Tuple(st_expr);
