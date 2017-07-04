@@ -26,8 +26,8 @@ setenv('HL_NUM_THREADS','12');
 % $$$ testCase = 'grating'; noFrm = 128;
 % $$$ frmWidth = 128; frmHeight = 128; noColorChan = 3;
 
-testCase = 'Cart_TPAT_3_PF_6_8_11fps';
-inVidName = ['/home/lpzal1/FredMRI/' testCase '.mov'];
+testCase = 'mri_video';
+inVidName = ['./Stimulus/' testCase '.mov'];
 % frmWidth = 683; frmHeight = 858; noFrm = 100; noColorChan = 3;
 frmWidth = 320; frmHeight = 480; noFrm = 100; noColorChan = 3;
 
